@@ -30,6 +30,17 @@ import java.util.LinkedHashMap;
 // should see about doing some refactoring to clean this up
 public class KeyBindings {
 
+	@FunctionalInterface
+	public interface KeyNameProvider {
+		String translate(int keyCode, String defaultName);
+	}
+
+	private static KeyNameProvider keyNameProvider;
+
+	public static void setKeyNameProvider(KeyNameProvider provider){
+		keyNameProvider = provider;
+	}
+
 	//for keyboard keys
 	private static LinkedHashMap<Integer, GameAction> bindings = new LinkedHashMap<>();
 
@@ -114,28 +125,28 @@ public class KeyBindings {
 	}
 
 	public static String getKeyName( int keyCode ){
-		if (ControllerHandler.customButtonName(keyCode) != null){
-			return ControllerHandler.customButtonName(keyCode);
-		}
+		String result = ControllerHandler.customButtonName(keyCode);
 
 		//custom codes for mouse buttons
-		if (keyCode == 1003){
-			return "Mouse 4";
-		} else if (keyCode == 1004) {
-			return "Mouse 5";
+		if (result == null){
+			if (keyCode == 1003){
+				result = "Mouse 4";
+			} else if (keyCode == 1004) {
+				result = "Mouse 5";
+			} else if (keyCode == Input.Keys.UNKNOWN){
+				result = "None";
+			} else if (keyCode == Input.Keys.PLUS){
+				result = "+";
+			} else if (keyCode == Input.Keys.BACKSPACE) {
+				result = "Backspace";
+			} else if (keyCode == Input.Keys.FORWARD_DEL) {
+				result = "Delete";
+			} else {
+				result = Input.Keys.toString(keyCode);
+			}
 		}
 
-		if (keyCode == Input.Keys.UNKNOWN){
-			return "None";
-		} else if (keyCode == Input.Keys.PLUS){
-			return "+";
-		} else if (keyCode == Input.Keys.BACKSPACE) {
-			return "Backspc";
-		} else if (keyCode == Input.Keys.FORWARD_DEL) {
-			return "Delete";
-		} else {
-			return Input.Keys.toString(keyCode);
-		}
+		return keyNameProvider == null ? result : keyNameProvider.translate(keyCode, result);
 	}
 
 }

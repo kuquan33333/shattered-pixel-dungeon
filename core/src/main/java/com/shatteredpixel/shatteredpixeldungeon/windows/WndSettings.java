@@ -1065,7 +1065,7 @@ public class WndSettings extends WndTabbed {
 
 			txtLangInfo = PixelScene.renderTextBlock(6);
 			String info = "_" + Messages.titleCase(currLang.nativeName()) + "_ - ";
-			if (currLang == Languages.ENGLISH) info += "This is the source language, written by the developer.";
+			if (currLang == Languages.ENGLISH) info += Messages.get(this, "source_language");
 			else if (currLang.status() == Languages.Status.O_COMPLETE) info += Messages.get(this, "completed");
 			else if (currLang.status() == Languages.Status.__UNREVIEW) info += Messages.get(this, "unreviewed");
 			else if (currLang.status() == Languages.Status.X_UNFINISH) info += Messages.get(this, "unfinished");

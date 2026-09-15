@@ -26,6 +26,7 @@ import com.badlogic.gdx.utils.I18NBundle;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.watabou.input.KeyBindings;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -78,6 +79,24 @@ public class Messages {
 	static{
 		formatters = new HashMap<>();
 		setup(SPDSettings.language());
+		KeyBindings.setKeyNameProvider((keyCode, defaultName) -> {
+			switch (defaultName) {
+				case "Mouse 4": return get("windows.wndkeybindings.mouse_4");
+				case "Mouse 5": return get("windows.wndkeybindings.mouse_5");
+				case "None": return get("windows.wndkeybindings.none");
+				case "Backspace": return get("windows.wndkeybindings.backspace");
+				case "Delete": return get("windows.wndkeybindings.delete");
+				case "Cross Button": return get("windows.wndkeybindings.cross_button");
+				case "Circle Button": return get("windows.wndkeybindings.circle_button");
+				case "Square Button": return get("windows.wndkeybindings.square_button");
+				case "Triangle Button": return get("windows.wndkeybindings.triangle_button");
+				case "Left Bumper": return get("windows.wndkeybindings.left_bumper");
+				case "Left Trigger": return get("windows.wndkeybindings.left_trigger");
+				case "Right Bumper": return get("windows.wndkeybindings.right_bumper");
+				case "Right Trigger": return get("windows.wndkeybindings.right_trigger");
+				default: return defaultName;
+			}
+		});
 	}
 
 	public static void setup( Languages lang ){
