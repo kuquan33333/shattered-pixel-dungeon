@@ -16,8 +16,8 @@ concurrency:
 jobs:
   build-ios:
     name: Build unsigned iOS IPA
-    # RoboVM 2.3.24 is built for Intel macOS; macOS 26 Intel provides Xcode 26.x
-    # and the iPhoneOS 26.x SDK while keeping the RoboVM compiler architecture-compatible.
+    # RoboVM 2.3.26 contains the iOS 26 bindings. The Intel runner keeps the
+    # RoboVM compiler architecture-compatible with the macOS toolchain.
     runs-on: macos-26-intel
 
     steps:
@@ -89,6 +89,8 @@ jobs:
           test -f "$app/Info.plist"
           bundle_id=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Info.plist")
           version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Info.plist")
+          minimum_os=$(/usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "$app/Info.plist")
+          test "$minimum_os" = "15.0"
           vi_count=$(find "$app" -type f -name '*_vi.properties' | wc -l | tr -d ' ')
           test "$vi_count" -eq 9
 
@@ -99,11 +101,26 @@ jobs:
             echo "IPA: dist/ShatteredPixelDungeon-unsigned.ipa"
             echo "Bundle ID: $bundle_id"
             echo "Version: $version"
+            echo "Minimum iOS: $minimum_os"
             echo "Vietnamese bundles: $vi_count"
             echo "SHA-256: $sha256"
           } | tee dist/BUILD-INFO.txt >> "$GITHUB_STEP_SUMMARY"
 
           echo "path=dist/ShatteredPixelDungeon-unsigned.ipa" >> "$GITHUB_OUTPUT"
+
+      - name: Publish build diagnostics
+        if: failure()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/robovm-build.log" ]; then
+            {
+              echo "### RoboVM build log (tail)"
+              echo '```text'
+              tail -n 120 "$RUNNER_TEMP/robovm-build.log"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            tail -n 120 "$RUNNER_TEMP/robovm-build.log"
+          fi
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
