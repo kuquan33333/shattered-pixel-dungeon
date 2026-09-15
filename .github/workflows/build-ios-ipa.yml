@@ -16,7 +16,9 @@ concurrency:
 jobs:
   build-ios:
     name: Build unsigned iOS IPA
-    runs-on: macos-14
+    # RoboVM 2.3.24 is built for Intel macOS; macOS 26 Intel provides Xcode 26.x
+    # and the iPhoneOS 26.x SDK while keeping the RoboVM compiler architecture-compatible.
+    runs-on: macos-26-intel
 
     steps:
       - name: Check out source
@@ -36,10 +38,27 @@ jobs:
         run: |
           set -euo pipefail
           xcodebuild -version
+          sdk_version=$(xcrun --sdk iphoneos --show-sdk-version)
+          sdk_major=${sdk_version%%.*}
+          if [ "$sdk_major" -lt 26 ]; then
+            echo "Expected iPhoneOS SDK 26 or newer, found $sdk_version" >&2
+            exit 1
+          fi
+          echo "iPhoneOS SDK: $sdk_version"
           java -version
 
       - name: Build IPA with RoboVM
-        run: ./gradlew ios:createIPA --no-daemon --stacktrace
+        run: |
+          set -o pipefail
+          ./gradlew ios:createIPA --no-daemon --stacktrace 2>&1 | tee "$RUNNER_TEMP/robovm-build.log"
+
+      - name: Upload RoboVM build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: robovm-build-log
+          path: ${{ runner.temp }}/robovm-build.log
+          if-no-files-found: ignore
 
       - name: Verify and package IPA
         id: package
