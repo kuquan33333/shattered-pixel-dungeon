@@ -50,7 +50,7 @@ jobs:
       - name: Build IPA with RoboVM
         run: |
           set -o pipefail
-          ./gradlew ios:createIPA --no-daemon --stacktrace 2>&1 | tee "$RUNNER_TEMP/robovm-build.log"
+          ./gradlew -PiosSkipSigning=true ios:createIPA --no-daemon --stacktrace 2>&1 | tee "$RUNNER_TEMP/robovm-build.log"
 
       - name: Upload RoboVM build log
         if: always()

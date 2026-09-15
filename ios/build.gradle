@@ -10,6 +10,12 @@ buildscript {
 apply plugin: "java"
 apply plugin: "robovm"
 
+robovm {
+    // CI produces an unsigned IPA; pass -PiosSkipSigning=false for a locally
+    // signed build when a matching Apple identity and provisioning profile exist.
+    iosSkipSigning = project.findProperty("iosSkipSigning")?.toString()?.toBoolean() ?: false
+}
+
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 java.sourceCompatibility = java.targetCompatibility = appJavaCompatibility
 
